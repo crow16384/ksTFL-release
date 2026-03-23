@@ -7,7 +7,7 @@ Pre-built binaries for the ksTFL package.
 ## Windows installation
 
 ```r
-install.packages("ksTFL", repos = "https://crow16384.github.io/ksTFL-release")
+install.packages("ksTFL", repos = "https://crow16384.github.io/ksTFL-release", type="binary")
 ```
 
 ## Linux installation
