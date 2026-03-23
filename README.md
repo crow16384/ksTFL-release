@@ -2,6 +2,8 @@
 
 Pre-built binaries for the ksTFL package.
 
+[Package documentation](https://crow16384.github.io/ksTFL-release/)
+
 ## Windows installation
 
 ```r
