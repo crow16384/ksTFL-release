@@ -15,8 +15,7 @@ bundled, and how to configure custom font directories.
 ## How Font Discovery Works
 
 When ksTFL is loaded (via [`library(ksTFL)`](https://example.com) or
-[`devtools::load_all()`](https://devtools.r-lib.org/reference/load_all.html)),
-the following happens:
+`devtools::load_all()`), the following happens:
 
 1.  **System directories are scanned.** The C++ font scanner inspects
     platform-specific directories using FreeType to read font family
