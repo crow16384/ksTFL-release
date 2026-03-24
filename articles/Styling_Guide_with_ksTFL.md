@@ -1,4 +1,4 @@
-# Styling Guide — ksTFL
+# Styling Guide (ksTFL)
 
 ![ksTFL logo](figures/ksTFL-logo.svg)
 

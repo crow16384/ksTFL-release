@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ksTFL</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.7.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.7.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,18 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.9" id="kstfl-079">ksTFL 0.7.9<a class="anchor" aria-label="anchor" href="#kstfl-079"></a></h2>
+<div class="section level3">
+<h3 id="cicd-0-7-9">CI/CD<a class="anchor" aria-label="anchor" href="#cicd-0-7-9"></a></h3>
+<ul><li>Added CRAN-like repository structure for Linux binaries (Ubuntu and Fedora), enabling <code><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages()</a></code> from the release repo on Linux.</li>
+<li>Added Red Hat / Fedora binary build using a Fedora container in CI.</li>
+<li>GitHub Releases are now published to both the private and public (ksTFL-release) repositories.</li>
+<li>New manual workflow (“Upload Binary to Release Repo”) for adding locally built packages (e.g., macOS) to the release repository.</li>
+<li>Added explicit pandoc setup to ensure vignettes build correctly on all platforms.</li>
+<li>Updated README installation instructions with per-platform sections.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.6" id="kstfl-076">ksTFL 0.7.6<a class="anchor" aria-label="anchor" href="#kstfl-076"></a></h2>
 <div class="section level3">

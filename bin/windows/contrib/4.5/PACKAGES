@@ -1,5 +1,5 @@
 Package: ksTFL
-Version: 0.7.8
+Version: 0.7.9
 Imports: cli, checkmate, jsonlite, purrr, rlang, tidyselect, utils,
         digest, htmltools, rstudioapi, Rcpp (>= 1.0.0)
 LinkingTo: Rcpp
