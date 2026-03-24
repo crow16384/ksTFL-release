@@ -2,7 +2,7 @@
 
 Pre-built binaries for the ksTFL package.
 
-[Package documentation](https://crow16384.github.io/ksTFL-release/)
+[Full Package documentation & Articles](https://crow16384.github.io/ksTFL-release/)
 # ksTFL: Clinical Tables, Figures, and Listings Framework
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
