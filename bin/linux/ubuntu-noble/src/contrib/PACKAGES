@@ -1,10 +1,10 @@
 Package: ksTFL
-Version: 0.7.9
+Version: 0.8.0
 Imports: cli, checkmate, jsonlite, purrr, rlang, tidyselect, utils,
         digest, htmltools, rstudioapi, Rcpp (>= 1.0.0)
 LinkingTo: Rcpp
 Suggests: testthat (>= 3.0.0), knitr, rmarkdown, ggplot2, shiny,
         colourpicker, sortable, shinyFiles
 License: GPL (>= 3) + file LICENSE
-MD5sum: 747ebe3302d5d603202252f9c7620ea8
+MD5sum: 26503ec1bab2366ed1c04682719c3819
 NeedsCompilation: yes
