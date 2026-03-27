@@ -32,6 +32,12 @@ Under the hood, a built-in **rendering engine** with text shaping converts decla
 
 ksTFL is distributed as **pre-compiled binaries** for R 4.4 and R 4.5 on Windows, Ubuntu/Debian, and Fedora/RHEL.
 
+### Dependencies
+
+Required R packages (`Imports`): `cli`, `checkmate`, `jsonlite`, `purrr`, `rlang`, `tidyselect`, `digest`, `htmltools`, `rstudioapi`, `Rcpp`
+
+Optional R packages required for shiny addins to work: `shiny`, `colourpicker`, `sortable`, `shinyFiles`
+
 ### Windows
 
 ```r
