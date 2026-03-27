@@ -47,12 +47,6 @@ install.packages("ksTFL",
                  repos = "https://crow16384.github.io/ksTFL-release/bin/linux/ubuntu-noble")
 ```
 
-Before installing, make sure system libraries are available (required at runtime):
-
-```bash
-sudo apt-get install -y libharfbuzz0b libfreetype6 libminizip1
-```
-
 ### Linux — Fedora / RHEL
 
 ```r
