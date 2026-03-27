@@ -54,12 +54,6 @@ install.packages("ksTFL",
                  repos = "https://crow16384.github.io/ksTFL-release/bin/linux/fedora")
 ```
 
-Before installing, make sure system libraries are available (required at runtime):
-
-```bash
-sudo dnf install -y harfbuzz freetype minizip-ng-compat
-```
-
 ### macOS
 
 macOS binaries are published as GitHub Release assets and can be installed from a downloaded `.tgz` file:
