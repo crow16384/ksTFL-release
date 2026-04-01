@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ksTFL</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.9.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,6 +17,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
+<li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
@@ -31,6 +32,30 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.10.0" id="kstfl-0100">ksTFL 0.10.0<a class="anchor" aria-label="anchor" href="#kstfl-0100"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-10-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-0-10-0"></a></h3>
+<ul><li>
+<strong>Paragraph-level borders</strong>: styles now support <code>&lt;w:pBdr&gt;</code> (paragraph borders) in addition to existing cell-level <code>&lt;w:tcBorders&gt;</code>. Paragraph borders underline only the text content within a cell, enabling visual gaps between spanning header groups without inserting dummy columns.
+<ul><li>New <code>borders</code> parameter in <code><a href="../reference/s_paragraph.html">s_paragraph()</a></code> accepts a border spec built with <code><a href="../reference/s_borders.html">s_borders()</a></code> / <code><a href="../reference/s_border.html">s_border()</a></code>.</li>
+<li>C++ rendering engine emits <code>&lt;w:pBdr&gt;</code> elements in paragraph properties.</li>
+<li>JSON schema (<code>styles_schema_v2.json</code>) updated to allow <code>borders</code> within paragraph definitions.</li>
+</ul></li>
+<li>New built-in atomic styles: <code>brw_thick</code> (4pt white right border), <code>blw_thick</code> (4pt white left border), <code>pb</code> (1pt paragraph bottom border), <code>pb_th</code> (0.5pt thin paragraph bottom border).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="shiny-styles-editor-0-10-0">Shiny Styles Editor<a class="anchor" aria-label="anchor" href="#shiny-styles-editor-0-10-0"></a></h3>
+<ul><li>Paragraph border controls (top, bottom, left, right) added to all text-style panels in the Shiny styles editor.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-10-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-10-0"></a></h3>
+<ul><li>Updated roxygen documentation for <code><a href="../reference/s_paragraph.html">s_paragraph()</a></code>, <code><a href="../reference/s_borders.html">s_borders()</a></code>, and <code><a href="../reference/s_border.html">s_border()</a></code> to describe paragraph border usage.</li>
+<li>New “Paragraph-level borders” subsection and updated atom reference table in the Styling Guide vignette.</li>
+<li>New Example 3 (paragraph borders on spanning headers) in the Reporting Examples vignette.</li>
+<li>New Example 6 (spanning header gap technique) in the Real Examples vignette.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.9.0" id="kstfl-090">ksTFL 0.9.0<a class="anchor" aria-label="anchor" href="#kstfl-090"></a></h2>
 <div class="section level3">

@@ -1,5 +1,45 @@
 # Changelog
 
+## ksTFL 0.10.0
+
+### New Features
+
+- **Paragraph-level borders**: styles now support `<w:pBdr>` (paragraph
+  borders) in addition to existing cell-level `<w:tcBorders>`. Paragraph
+  borders underline only the text content within a cell, enabling visual
+  gaps between spanning header groups without inserting dummy columns.
+  - New `borders` parameter in
+    [`s_paragraph()`](https://example.com/reference/s_paragraph.md)
+    accepts a border spec built with
+    [`s_borders()`](https://example.com/reference/s_borders.md) /
+    [`s_border()`](https://example.com/reference/s_border.md).
+  - C++ rendering engine emits `<w:pBdr>` elements in paragraph
+    properties.
+  - JSON schema (`styles_schema_v2.json`) updated to allow `borders`
+    within paragraph definitions.
+- New built-in atomic styles: `brw_thick` (4pt white right border),
+  `blw_thick` (4pt white left border), `pb` (1pt paragraph bottom
+  border), `pb_th` (0.5pt thin paragraph bottom border).
+
+### Shiny Styles Editor
+
+- Paragraph border controls (top, bottom, left, right) added to all
+  text-style panels in the Shiny styles editor.
+
+### Documentation
+
+- Updated roxygen documentation for
+  [`s_paragraph()`](https://example.com/reference/s_paragraph.md),
+  [`s_borders()`](https://example.com/reference/s_borders.md), and
+  [`s_border()`](https://example.com/reference/s_border.md) to describe
+  paragraph border usage.
+- New “Paragraph-level borders” subsection and updated atom reference
+  table in the Styling Guide vignette.
+- New Example 3 (paragraph borders on spanning headers) in the Reporting
+  Examples vignette.
+- New Example 6 (spanning header gap technique) in the Real Examples
+  vignette.
+
 ## ksTFL 0.9.0
 
 ### Build System

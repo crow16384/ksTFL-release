@@ -281,10 +281,12 @@ style, width, and color.
 
 \- `right`: Right border (use `s_border(...)`)
 
-**Note**: [`s_borders()`](https://example.com/reference/s_borders.md) is
-always used **inside
-[`s_table_style()`](https://example.com/reference/s_table_style.md)**,
-never standalone.
+**Note**: [`s_borders()`](https://example.com/reference/s_borders.md)
+can be used **inside
+[`s_table_style()`](https://example.com/reference/s_table_style.md)**
+for cell-level borders, or **inside
+[`s_paragraph()`](https://example.com/reference/s_paragraph.md)** for
+paragraph-level borders.
 
 ### `s_border()` — Individual border line
 
@@ -325,6 +327,54 @@ spec <- add_style(spec, id = "bottom_border_heavy",
   )
 )
 ```
+
+### Paragraph-level borders
+
+MS Word distinguishes between cell borders (`<w:tcBorders>`) and
+paragraph borders (`<w:pBdr>`). Cell borders always span the full cell
+width, while paragraph borders follow the text within the cell. This is
+particularly useful for spanning headers where a cell border would
+stretch across all merged columns, but a paragraph border only
+underlines the header label.
+
+Paragraph borders are set via
+[`s_borders()`](https://example.com/reference/s_borders.md) inside
+[`s_paragraph()`](https://example.com/reference/s_paragraph.md):
+
+``` r
+spec <- create_table(my_data)
+
+# Paragraph bottom border — underlines only the text, not the full cell
+spec <- add_style(spec, id = "span_underline",
+  s_font(bold = TRUE),
+  s_paragraph(
+    alignment = "center",
+    borders = s_borders(
+      bottom = s_border(color = "#000000", width = "0.5pt", line_style = "single")
+    )
+  )
+)
+
+# Apply to a spanning header
+spec <- add_span_header(spec,
+  cols = c("trt_a", "trt_b"),
+  label = "Treatment Arms",
+  labelStyleRef = "span_underline"
+)
+
+# Combine paragraph border atom with other styles
+spec <- add_span_header(spec,
+  cols = c("age", "sex"),
+  label = "Demographics",
+  labelStyleRef = f_combine("b", "ac", "pb_th")
+)
+```
+
+**Key difference**: structural borders (`header_top_border`,
+`header_bottom_border`) override cell-level borders on header rows but
+cannot affect paragraph borders. This makes paragraph borders useful
+when you need visual separators independent of the table’s structural
+framing.
 
 ------------------------------------------------------------------------
 
@@ -827,6 +877,12 @@ tfl_print_style_atoms()
 | **Border — colour override**                                       |                                                                           |
 | `bc_gray` / `bc_grey`                                              | All sides → medium gray (#AAAAAA)                                         |
 | `bc_white`                                                         | All sides → white / none (suppress borders)                               |
+| **Border — thick white sides (column separation)**                 |                                                                           |
+| `brw_thick`                                                        | Right border 4 pt white (visual column gap)                               |
+| `blw_thick`                                                        | Left border 4 pt white (visual column gap)                                |
+| **Paragraph border — bottom**                                      |                                                                           |
+| `pb`                                                               | Paragraph bottom border 1 pt black                                        |
+| `pb_th`                                                            | Paragraph bottom border 0.5 pt black (thin)                               |
 
 **Usage:**
 
