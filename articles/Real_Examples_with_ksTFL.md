@@ -67,6 +67,7 @@ these options are set once at the session level, individual specs don’t
 need to repeat them — they inherit the defaults automatically:
 
 ``` r
+
 library(ksTFL)
 library(dplyr)
 
@@ -122,6 +123,7 @@ rows — it is `NA` everywhere else, which is how we target those rows in
 and page-break logic:
 
 ``` r
+
 raw <- tibble(
   SECTION = c(
     rep("Age (years)", 6),
@@ -173,6 +175,7 @@ The first few rows of `raw`:
 ### Building the specification
 
 ``` r
+
 spec <- create_table(raw) %>%
 
   # --- Titles and footnotes ---
@@ -255,6 +258,7 @@ spec <- create_table(raw) %>%
 ### Render
 
 ``` r
+
 create_report(spec) %>% write_doc("example_01")
 ```
 
@@ -272,6 +276,7 @@ single parameter on an already-built spec, without touching any of the
 data or conditional logic:
 
 ``` r
+
 spec <- set_document(spec, docTemplate = 'Navy_Pro')
 create_report(spec) %>% write_doc("example_01_navy")
 ```
@@ -337,6 +342,7 @@ comments below alongside Example 1 will help you see the one-to-one
 correspondence:
 
 ``` r
+
 ### Build the specification object
 
 drg_N   <- 16
@@ -477,6 +483,7 @@ This example demonstrates:
 ### Code
 
 ``` r
+
 # --- Build the table specification ---
 spec <- create_table(tbl) %>%
 
@@ -689,6 +696,7 @@ become essential. This example demonstrates:
 ### Code
 
 ``` r
+
 spec_lbl_01 <- create_table(data) %>%
 
   # --- Title and dynamic subtitle ---
@@ -787,6 +795,7 @@ column groups — Bilirubin through Nitrites on the first page, and pH
 through White Blood Cells on the second:
 
 ``` r
+
 spec_lbl_02 <- spec_lbl_01 %>%
   # Add a column break at PH — all columns from PH onward move to a new page.
   # The Treatment, Visit, and Date columns (isID = TRUE) repeat automatically.
@@ -823,6 +832,7 @@ landscape document with a TOC page.
 ### Code
 
 ``` r
+
 library(ggplot2)
 
 # --- Figure 1: Fuel efficiency scatter plot from mtcars ---
@@ -933,7 +943,131 @@ thanks to `figureScaleMode = "fitPage"`.
 [Download
 figures_single_doc_toc.pdf](https://example.com/articles/pdf/figures_single_doc_toc.pdf)
 
-## Example 6 - Gap between Spanning Header Lines
+## Example 6 - Table under the figure
+
+In clinical reporting, you often need to place a summary table directly
+under a figure (e.g., a PK concentration-time plot followed by a summary
+statistics table). This pattern uses two specs — one for the figure and
+one for the table — combined in a single report with
+`continuousSection = TRUE` on both to suppress page breaks between them.
+
+**Key design principles:**
+
+- **Figure subtitle** — by default now appears **above** the figure
+  image, between the title and the plot. You can override this with
+  template-level configuration or per-spec settings if needed.
+- **Continuous section breaks** — both the figure and table specs must
+  have `continuousSection = TRUE` to flow together without a page break.
+- **Spacing and sizing** — you are responsible for ensuring the combined
+  height of figure + table + titles/footnotes fits within the page. Use
+  `figureHeight` parameter to adjust the plot size if needed.
+- **Table title** — you can omit the table title (letting the figure
+  subtitle serve as visual context) or add an explicit title to the
+  table spec for clarity.
+
+### Data
+
+    > pk
+    # A tibble: 21 × 3
+        TIME TRT       CONC
+       <dbl> <chr>    <dbl>
+     1   0   Placebo      0
+     2   0.5 Placebo     14
+     3   1   Placebo     25
+     4   2   Placebo     20
+     5   4   Placebo     11
+     6   8   Placebo      6
+     7  12   Placebo      3
+     8   0   Low Dose     0
+     9   0.5 Low Dose    22
+    10   1   Low Dose    39
+    # ℹ 11 more rows
+    > summary_tbl
+    # A tibble: 3 × 3
+      TRT        Cmax  Tmax
+      <chr>     <dbl> <dbl>
+    1 High Dose    52     1
+    2 Low Dose     39     1
+    3 Placebo      25     1
+
+### Code
+
+``` r
+
+p <- ggplot2::ggplot(pk, ggplot2::aes(TIME, CONC, colour = TRT, shape = TRT)) +
+    ggplot2::geom_line(linewidth = 0.9) +
+    ggplot2::geom_point(size = 2.8) +
+    ggplot2::scale_x_continuous(breaks = c(0, 0.5, 1, 2, 4, 8, 12)) +
+    ggplot2::labs(x = "Time (h)", y = "Concentration (ng/mL)") +
+    ggplot2::theme_bw(base_size = 11) +
+    ggplot2::theme(legend.position = "bottom")
+
+spec_fig <- create_figure(p) %>%
+    add_title(c("Figure S3.1", "Mean PK Concentration–Time Profile"), toclevel = 1) %>%
+    add_subtitle("PK Analysis Set") %>%
+    set_document(continuousSection = TRUE, figureHeight = '3in')
+
+spec_tbl <- create_table(summary_tbl) %>%
+  define_cols(TRT, label = "Treatment", isID = TRUE, colWidth = "40%") %>%
+  define_cols(Cmax, label = "C[max]", type = "numeric", format = "%.1f", valueStyleRef = "text_center") %>%
+  define_cols(Tmax, label = "T[max] (h)", type = "numeric", format = "%.1f", valueStyleRef = "text_center") %>%
+  add_footnote("C[max] = maximum concentration; T[max] = time of C[max].") %>%
+  set_document(continuousSection = TRUE)
+
+create_report(spec_fig, spec_tbl) %>%
+  write_doc("table_under_figure", toc = TRUE)
+```
+
+### Rendered output
+
+[Download
+table_under_figure.pdf](https://example.com/articles/pdf/example_03.1_table_under_figure.pdf)
+
+### Variation: adding an explicit table title
+
+If you want the table to have its own title (in addition to the figure),
+simply add a title to the table spec:
+
+``` r
+
+spec_tbl_titled <- create_table(summary_tbl) %>%
+  add_title(c("Table S3.1", "PK Summary Parameters"), toclevel = 1) %>%
+  define_cols(TRT, label = "Treatment", isID = TRUE, colWidth = "40%") %>%
+  define_cols(Cmax, label = "C[max]", type = "numeric", format = "%.1f", valueStyleRef = "text_center") %>%
+  define_cols(Tmax, label = "T[max] (h)", type = "numeric", format = "%.1f", valueStyleRef = "text_center") %>%
+  add_footnote("C[max] = maximum concentration; T[max] = time of C[max].") %>%
+  set_document(continuousSection = TRUE)
+
+create_report(spec_fig, spec_tbl_titled) %>%
+  write_doc("table_under_figure_titled", toc = TRUE)
+```
+
+This creates two separate entries in the Table of Contents: one for the
+figure and one for the table.
+
+### Troubleshooting: When figure and table don’t fit
+
+If the combined height of the figure, table, and all titles/footnotes
+exceeds the page height, Word will force an automatic page break between
+them. To keep them together on one page, reduce the `figureHeight`:
+
+``` r
+
+spec_fig_compact <- create_figure(p) %>%
+    add_title(c("Figure S3.1", "Mean PK Concentration–Time Profile"), toclevel = 1) %>%
+    add_subtitle("PK Analysis Set") %>%
+    # Reduce from 3in to 2in to leave more room for the table on the same page
+    set_document(continuousSection = TRUE, figureHeight = '2in')
+
+create_report(spec_fig_compact, spec_tbl) %>%
+  write_doc("table_under_figure_compact", toc = TRUE)
+```
+
+Alternatively, use `figureScaleMode = "fitWidth"` to scale the figure
+proportionally to the available width while respecting a height
+constraint.
+
+## Example 7 - Gap between Spanning Header Lines
 
 Sometimes it is necessary to include a visual gap between spanning
 column groups so it is clear which columns belong to which header. This
@@ -957,6 +1091,7 @@ We want to add spanning headers ‘Group 1’ covering `TRT_A1` and
 If we do this in the usual way:
 
 ``` r
+
 spec <- create_table(demo_data) |>
   add_title("Table 14.1.1") |>
   add_title("Summary of Demographic and Baseline Characteristics") |>
@@ -984,6 +1119,7 @@ The paragraph border only underlines the text of each spanning header
 individually, creating a visible gap between the two groups:
 
 ``` r
+
 spec <- create_table(demo_data) |>
   add_title("Table 14.1.1") |>
   add_title("Summary of Demographic and Baseline Characteristics") |>

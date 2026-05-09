@@ -1,5 +1,186 @@
 # Changelog
 
+## ksTFL 0.11.1
+
+### Vendor library upgrades
+
+- **FreeType** upgraded 2.13.3 → 2.14.3 (latest upstream). Picks up ~18
+  months of glyph loader, CFF, and auto-hinter fixes. Customised
+  `ftmodule.h` (restricting the compiled module set to what ksTFL
+  actually uses) preserved on top of the new tree.
+- **HarfBuzz** upgraded 10.2.0 → 14.2.0 (latest upstream). Incorporates
+  four major releases of shaping/OpenType improvements and bug fixes.
+  Our feature-disable flags (`HB_NO_SUBSET`, `HB_NO_COLOR`,
+  `HB_NO_PAINT`, `HB_NO_STYLE`) carry over unchanged.
+
+No behavioural change in ksTFL itself; all 19 test files continue to
+pass, including measurement-sensitive paths (width recalc, column
+computation, ggplot figure rendering, end-to-end DOCX write).
+
+## ksTFL 0.11.0
+
+### Code audit: bug fixes, correctness & performance
+
+Three-batch sweep over the R and C++ codebases covering
+project-convention compliance, thread safety, numeric correctness,
+locale independence, and hot paths in the rendering engine.
+
+#### R — convention & correctness
+
+- [`stop()`](https://rdrr.io/r/base/stop.html) /
+  [`warning()`](https://rdrr.io/r/base/warning.html) replaced with
+  `cli_abort()` / `cli_warn()` in `run_replay_app.R`,
+  `run_styles_editor.R`, `ksTFL.R`.
+- Figure scale modes now consistently reference
+  `.const_figure_scale_modes` (in `spec_context.R`, `pkg_settings.R`).
+- [`sapply()`](https://rdrr.io/r/base/lapply.html) →
+  [`vapply()`](https://rdrr.io/r/base/lapply.html) (type-safe) across
+  `spec_print.R`, `spec_context.R`, `pkg_settings.R`,
+  `schema_serialize.R`.
+- **`.env_eval()` no longer silently defaults to
+  `spec$.metadata$data_env`**: the `env` argument is validated
+  (non-null,
+  [`is.environment()`](https://rdrr.io/r/base/environment.html)) and
+  `cli_abort()` is raised otherwise. Eliminates a class of subtle
+  dispatch bugs where an evaluation could bind against a stale `spec`.
+- Removed dead schema fallbacks (`cs$label %||% cs$colLabel`, etc.) in
+  `spec_print.R`; schema uses `label` / `format` only.
+
+#### C++ — correctness & safety
+
+- **Font registry thread-safety** (`font_scanner.h/.cpp`): migrated to
+  `std::shared_mutex`; reader accessors take `std::shared_lock` and
+  return by value, so
+  [`tfl_rescan_fonts()`](https://example.com/reference/tfl_rescan_fonts.md)
+  remains safe to call while renders run. (`std::call_once` rejected
+  because rescanning is an explicit user feature.)
+- **UTF-8 decoder validation** (`text_measurer.cpp`): each continuation
+  byte is now checked for `10xxxxxx` bits; on malformed sequences the
+  decoder emits U+FFFD and advances exactly one byte to resync.
+- **Locale-independent numeric formatting** (`logical_table.cpp`):
+  `apply_column_format()` switched from `std::strtod` to
+  `std::from_chars<double>`; column format parsing is no longer affected
+  by the process locale.
+- **Column-width scaling precision** (`paginator.cpp`):
+  `compute_segment_column_widths()` performs all arithmetic in `double`
+  and clamps to `[0, INT64_MAX]` before narrowing to int64 EMU.
+- **TOC style id generation** (`docx_emitter.cpp`): replaced `snprintf`
+  into a fixed 64-byte buffer with `std::to_string` concatenation;
+  buffer truncation is no longer possible.
+- **Header-grid span/gap mismatch** (`logical_table.cpp`): previously a
+  silent [`break`](https://rdrr.io/r/base/Control.html); now emits an
+  `Rcpp::warning` with row and span info (falls back to rendering
+  without promotion).
+
+#### C++ — performance
+
+- **Inline parser stack container** (`inline_parser.cpp`): replaced
+  `std::stack<TagType>` with `std::vector<TagType>`;
+  `ParserState::from_stack()` reduced from two full stack copies to a
+  single reverse-iterator pass with inline Sup/Sub mutual exclusion.
+  Closing-tag lookup uses `rbegin()`
+  - `erase()` instead of a copy/push/pop loop.
+- **Dedupe restoration at page boundaries** (`renderer.cpp`): reworked
+  `restore_dedupe_at_page_boundaries()` from
+  `O(pages · dedupe_cols · rows)` backward scans to a single forward
+  pass with running per-column last-non-empty state,
+  `O(rows + pages · dedupe_cols)`.
+- **Redundant `FT_Set_Char_Size`** (`font_cache.cpp`): `CachedFace` now
+  tracks `last_size_pt`; `get_hb_font()` skips FreeType resizing and
+  `hb_ft_font_changed` when the face is already set to the requested
+  size.
+- **`try_emplace` in style-ref cache** (`paginator.cpp`): single hash
+  lookup on both hit and miss paths.
+- **`reserve()`** for output vectors in `parse_text_groups`,
+  `parse_header_footer`, `parse_stub_columns`, `parse_columns`
+  (`json_parser.cpp`) and for segment `column_indices`
+  (`paginator.cpp`).
+- **Cache `page_config.usable_width()`** once at the top of
+  `Paginator::paginate()` instead of recomputing per segment.
+- Removed redundant `dest.reserve()` calls in `xml_writer.cpp`
+  `escape_text_into` / `escape_attr_into` (buffer pre-reserved 64KB).
+
+#### Polish
+
+- `extract_number()` in `units.cpp`: renamed out-param and clarified
+  contract (`end_pos` written at end, internal `pos` local).
+
+## ksTFL 0.10.4
+
+### Fixes
+
+- **`continuousSection` semantics corrected in DOCX renderer**: section
+  break type is now taken from the section/spec being emitted (not the
+  next spec), so `continuousSection = TRUE` applies to the intended
+  spec.
+- **Body-level section properties honor `continuousSection`**: the last
+  spec can now emit a body-level `w:type="continuous"`, allowing
+  figure-to-table flow without an unintended final next-page break.
+- **TOC-to-body transition behavior restored**: TOC remains separated
+  with a `nextPage` break while in-body specs can still flow
+  continuously as requested.
+- Added/updated regression tests for multi-spec section break typing,
+  including body-level `sectPr` behavior.
+
+## ksTFL 0.10.3
+
+### Internal C++ Engine
+
+- **Optimised `get_plain_text()`** (`inline_parser.cpp`): replaced the
+  parse-full-AST-then-extract approach with a single-pass tag-stripping
+  scanner that reuses `extract_tag()`/`classify_tag()` directly,
+  eliminating all intermediate `ParsedCell`/`TextRun` allocations.
+- Added 16 unit tests for `get_plain_text()` covering all recognised tag
+  types, `<br>` → space conversion, nested tags, and literal angle
+  brackets.
+
+## ksTFL 0.10.2
+
+### Internal C++ Engine — Safety, Performance & Modernisation
+
+- **Exception-safe font loading** (`font_cache.cpp`): `load_face()` now
+  wraps `hb_ft_font_create_referenced()` in a try/catch block that calls
+  `FT_Done_Face()` before rethrowing, preventing a FreeType handle leak
+  on any HarfBuzz construction failure.
+- **Eliminated redundant string lowering** (`font_cache.cpp`,
+  `font_scanner.cpp`): `font_name_to_stem_hint()` already returns a
+  lowercase string, so the second `to_lower` pass in `find_font_file()`
+  was removed. `TargetFallback` structs now pre-compute a `target_lower`
+  field so per-call lowering inside `get_fallback_family()` is avoided
+  entirely.
+- **In-place style cascade application** (`style_resolver.h`,
+  `style_resolver.cpp`): new
+  `apply_style_ref_inplace(StyleDef &, const std::string &)` mutates the
+  target directly instead of copy-merge-return. All callers in
+  `resolve_header_cell_style()`, `resolve_body_cell_style()`,
+  `resolve_content_style()`, `resolve_body_text_style()` and
+  `resolve_figure_caption_style()` converted to the in-place variant,
+  eliminating one `StyleDef` copy per style-ref application.
+- **Per-column base-style caches in paginator** (`paginator.cpp`): the
+  row loop in `compute_row_heights_impl` now pre-computes
+  `base_style_cache` and `addrow_style_cache` (indexed by column index)
+  *before* iterating over rows, cutting repeated template-cascade merges
+  (steps 1–5) to a one-time cost. A `style_ref_cache`
+  (`std::unordered_map<std::string, const StyleDef*>`) is built once per
+  segment to cache `find_style()` pointer lookups. A
+  `requires std::invocable<…>` constraint was added to the template for
+  earlier type-checking.
+- **Pre-computed style caches in DOCX table emission**
+  (`docx_emitter.h`, `docx_table.cpp`): `emit_table()` builds
+  `base_style_cache` and `addrow_style_cache` once per segment and
+  passes them to `emit_table_row()`, which now applies only row/cell
+  overrides on top of the cached base instead of recomputing the full
+  cascade for every cell.
+- **Stack-allocated tag buffer** (`inline_parser.cpp`): `classify_tag()`
+  replaced a heap-allocated `std::string lower` with a
+  `char lower_buf[8]` stack buffer — tag names are at most 3 characters,
+  so no heap allocation is needed per tag.
+- **`std::format` for error messages** (`json_parser.cpp`,
+  `renderer.cpp`, `font_cache.cpp`): all
+  `throw RenderError("…" + var + "…")` patterns replaced with
+  `std::format("…{}", var)`, removing temporary string concatenations
+  (15 call sites total).
+
 ## ksTFL 0.10.1
 
 ### Fixes

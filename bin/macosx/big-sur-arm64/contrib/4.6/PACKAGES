@@ -1,0 +1,11 @@
+Package: ksTFL
+Version: 0.11.1
+Imports: cli, checkmate, jsonlite, purrr, rlang, tidyselect, utils,
+        digest, htmltools, rstudioapi, Rcpp (>= 1.0.0)
+LinkingTo: Rcpp
+Suggests: testthat (>= 3.0.0), knitr, rmarkdown, ggplot2, shiny,
+        colourpicker, sortable, shinyFiles
+License: GPL (>= 3) + file LICENSE
+MD5sum: 53c8f3ca94c842e94e06efccf6e4cfeb
+Built: R 4.6.0; aarch64-apple-darwin23; 2026-05-09 08:23:49 UTC; unix
+File: ksTFL_0.11.1.tgz
